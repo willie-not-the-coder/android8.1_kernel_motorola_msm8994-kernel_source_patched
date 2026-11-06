@@ -1,0 +1,14 @@
+Build-only compatibility changes used because the supplied legacy tree expects GCC 4.9,
+while this workspace has Clang 17 and Python 3 only. These do not belong to Patch253's
+functional diagnostic changes.
+
+1. arch/arm64/kernel/entry.S: legacy macro argument expansion adjusted for Clang assembler.
+2. arch/arm64/include/asm/spinlock.h: old "I" immediate constraints changed to "n" where needed by Clang.
+3. arch/arm64/crypto/aes-ce-cipher.c: legacy SIMD lane spelling adjusted for Clang integrated assembler.
+4. scripts/gcc-wrapper.py: Python-2 print/subprocess syntax ported to Python 3 so Kbuild's original warning policy remains active.
+5. Nine legacy crypto call sites with GNU VLA-in-local-struct extension were represented as equivalent aligned stack storage plus struct shash_desc pointer; calls use the same descriptor storage.
+6. Local /mnt/data/stage06_work/bc compatibility tool supplies the kernel's timeconst.bc arithmetic generator because host bc is absent.
+7. net/netfilter/xt_repldata.h: replaced the GCC-only VLA temporary struct with identical byte-layout pointer arithmetic; semantics/layout preserved for all ipt/ip6t/arpt callers.
+8. clang-legacy-cc: added -Wno-unknown-warning-option so GCC-only warning names do not become Clang -Werror failures.
+9. clang-legacy-cc: appended -Wno-error after Kbuild flags so legacy Clang warnings do not become fatal; hard compile/link errors remain fatal.
+10. drivers/usb/gadget/f_fs.c: replaced two GCC-only VLA-in-local-struct aggregates with explicit single-chunk offset/alignment allocation preserving field order, pointer ownership, and free semantics; verified drivers/usb/gadget/android.o builds with Clang 17.
